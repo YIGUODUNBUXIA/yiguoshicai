@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成品商品拆原食材统计工具 · 简化版</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:"Microsoft YaHei",sans-serif;
+        }
+        body{
+            max-width:1350px;
+            margin:30px auto;
+            padding:0 20px;
+            background:#f7f8fa;
+        }
+        .container{
+            background:#ffffff;
+            padding:35px;
+            border-radius:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.06);
+        }
+        .main-title{
+            text-align:center;
+            color:#222;
+            margin-bottom:28px;
+            font-size:26px;
+        }
+        /* 商品-原料配置区域 */
+        .goods-config{
+            background:#f9fafb;
+            padding:25px;
+            border-radius:8px;
+            border:1px solid #e5e7eb;
+            margin-bottom:25px;
+        }
+        .sec-title{
+            font-size:19px;
+            color:#333;
+            margin-bottom:18px;
+            font-weight:bold;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+        .config-actions{
+            display:flex;
+            gap:10px;
+        }
+        .input-group{
+            display:flex;
+            gap:8px;
+            margin-bottom:16px;
+            flex-wrap:wrap;
+            align-items:center;
+        }
+        .form-input{
+            padding:8px 12px;
+            border:1px solid #d1d5db;
+            border-radius:6px;
+            font-size:14px;
+            outline:none;
+            transition:border-color 0.2s;
+        }
+        .form-input:focus{
+            border-color:#3b82f6;
+        }
+        .input-name{width:240px;}
+        .input-spec{width:200px;}
+        .input-material{width:160px;}
+        .input-unit{width:80px;}
+        .input-dose{width:110px;}
+        .input-flavor{width:150px;}
+        .btn{
+            padding:9px 18px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:14px;
+            font-weight:bold;
+            transition:background 0.2s;
+        }
+        .btn-primary{
+            background:#3b82f6;
+            color:#fff;
+        }
+        .btn-primary:hover{
+            background:#2563eb;
+        }
+        .btn-danger{
+            background:#ef4444;
+            color:#fff;
+        }
+        .btn-danger:hover{
+            background:#dc2626;
+        }
+        .btn-secondary{
+            background:#64748b;
+            color:#fff;
+        }
+        .btn-secondary:hover{
+            background:#475569;
+        }
+        .goods-list{
+            max-height:260px;
+            overflow-y:auto;
+            border:1px solid #e5e7eb;
+            border-radius:6px;
+            padding:10px;
+        }
+        .goods-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:10px 12px;
+            border-bottom:1px solid #f3f4f6;
+        }
+        .goods-item:last-child{border-bottom:none;}
+        .goods-info{color:#374151;font-size:14px;line-height:1.4;}
+        .btn-del{
+            padding:4px 10px;
+            background:#ef4444;
+            color:#fff;
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+            font-size:12px;
+        }
+        .empty-tip{
+            text-align:center;
+            padding:22px;
+            color:#9ca3af;
+            font-size:14px;
+        }
+        .label-text{
+            font-size:13px;
+            color:#444;
+            font-weight:bold;
+        }
+        /* 数据粘贴区域 */
+        .data-paste{
+            margin-bottom:25px;
+        }
+        #dataArea,#flavorDataArea{
+            width:100%;
+            height:100px;
+            padding:14px;
+            border:1px solid #d1d5db;
+            border-radius:8px;
+            resize:vertical;
+            font-size:14px;
+            line-height:1.6;
+        }
+        .format-tip{
+            font-size:13px;
+            color:#6b7280;
+            margin:9px 0;
+            line-height:1.5;
+        }
+        .format-tip strong{color:#dc2626;}
+        /* 结果展示区域 */
+        .result-area{
+            margin-top:20px;
+        }
+        .result-table{
+            width:100%;
+            border-collapse:collapse;
+            background:#fff;
+        }
+        .result-table th,.result-table td{
+            border:1px solid #e5e7eb;
+            padding:11px;
+            text-align:center;
+            font-size:14px;
+        }
+        .result-table th{
+            background:#f1f5f9;
+            font-weight:bold;
+            color:#1f2937;
+        }
+        .status-error{color:#ef4444;font-weight:bold;}
+        .status-nomaterial{color:#2563eb;font-weight:bold;}
+        /* 原料汇总区域 */
+        .summary-box{
+            margin-top:20px;
+            padding:20px;
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-radius:8px;
+        }
+        .summary-title{
+            font-size:18px;
+            font-weight:bold;
+            color:#166534;
+            margin-bottom:12px;
+        }
+        .material-summary{
+            display:flex;
+            flex-wrap:wrap;
+            gap:25px;
+            font-size:16px;
+            font-weight:bold;
+            color:#15803d;
+        }
+        .summary-item{
+            white-space:nowrap;
+        }
+        /* 折叠按钮样式（仅用于商品配置区域） */
+        .fold-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .config-content {
+            margin-top: 10px;
+        }
+        .sub-title{
+            font-size:15px;
+            color:#333;
+            font-weight:bold;
+            margin:6px 0 12px;
+            display:flex;
+            align-items:center;
+        }
+        /* 导入文件隐藏input */
+        #importFile {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="main-title">成品商品拆分解原食材统计工具</h1>
+    <!-- 一、成品库配置区（基础配方 + 做法/口味配方 合并为一个窗口） -->
+    <div class="goods-config">
+        <div class="sec-title">
+            <span>成品库配置（商品名+规格+原食材/口味用量）</span>
+            <div class="config-actions">
+                <button class="btn btn-secondary fold-btn" onclick="toggleFold('config-content', this)">展开</button>
+                <button class="btn btn-secondary" onclick="exportGoodsConfig()">导出配置</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">导入配置</button>
+                <input type="file" id="importFile" accept=".json" onchange="importGoodsConfig(this)">
+                <button class="btn btn-danger" onclick="clearAllGoods()">清空全部配置</button>
+            </div>
+        </div>
+        <div id="config-content" class="config-content" style="display:none;">
+            <!-- 子区1：基础配方（含可选口味原料） -->
+            <div class="sub-title">基础配方（口味原料可空）</div>
+            <div class="input-group">
+                <input type="text" id="goodsName" class="form-input input-name" placeholder="成品名称（如：吐司面包）">
+                <input type="text" id="goodsSpec" class="form-input input-spec" list="specOptions" placeholder="选择或输入规格">
+                <datalist id="specOptions">
+                    <option value="小锅（2人锅）"></option>
+                    <option value="中锅（4人锅）"></option>
+                    <option value="大锅（6人锅）"></option>
+                    <option value="标准"></option>
+                </datalist>
+                <span class="label-text">原料1</span>
+                <input type="text" id="mat1Name" class="form-input input-material" placeholder="原料名（如：高筋面粉）">
+                <input type="text" id="mat1Unit" class="form-input input-unit" placeholder="单位（斤/个/串/只）">
+                <input type="number" id="mat1Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text">原料2</span>
+                <input type="text" id="mat2Name" class="form-input input-material" placeholder="原料名（如：鸡蛋）">
+                <input type="text" id="mat2Unit" class="form-input input-unit" placeholder="单位（斤/个/串/只）">
+                <input type="number" id="mat2Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text">原料3</span>
+                <input type="text" id="mat3Name" class="form-input input-material" placeholder="原料名（如：牛奶）">
+                <input type="text" id="mat3Unit" class="form-input input-unit" placeholder="单位（斤/个/串/只）">
+                <input type="number" id="mat3Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text">原料4</span>
+                <input type="text" id="mat4Name" class="form-input input-material" placeholder="原料名（如：糖）">
+                <input type="text" id="mat4Unit" class="form-input input-unit" placeholder="单位（斤/个/串/只）">
+                <input type="number" id="mat4Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text">原料5</span>
+                <input type="text" id="mat5Name" class="form-input input-material" placeholder="原料名（如：黄油）">
+                <input type="text" id="mat5Unit" class="form-input input-unit" placeholder="单位（斤/个/串/只）">
+                <input type="number" id="mat5Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+            </div>
+            <!-- 口味原材料一行（原料5下方，填写做法/口味时录入两种口味原料） -->
+            <div class="input-group" style="margin-top:12px;">
+                <span class="label-text" style="color:#b45309;">口味原料1</span>
+                <input type="text" id="gFlvMat1Name" class="form-input input-material" placeholder="口味原料名（如：辣椒）">
+                <input type="text" id="gFlvMat1Unit" class="form-input input-unit" placeholder="单位（克/斤）">
+                <input type="number" id="gFlvMat1Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text" style="color:#b45309;">口味原料2</span>
+                <input type="text" id="gFlvMat2Name" class="form-input input-material" placeholder="口味原料名（如：花椒）">
+                <input type="text" id="gFlvMat2Unit" class="form-input input-unit" placeholder="单位（克/斤）">
+                <input type="number" id="gFlvMat2Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <button class="btn btn-primary" onclick="saveGoodsMaterial()">保存成品配置</button>
+            </div>
+            <div id="goodsList" class="goods-list">
+                <div class="empty-tip">暂未配置任何成品，请先录入商品与对应原料用量</div>
+            </div>
+            <!-- 子区2：做法/口味配方（带口味商品） -->
+            <div class="sub-title" style="margin-top:24px;">做法/口味配方（带口味商品）
+                <button class="btn-del" onclick="clearAllFlavors()" style="margin-left:12px;">清空全部口味</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="flvGoodsName" class="form-input input-name" placeholder="成品名称（如：烤鱼）">
+                <input type="text" id="flvGoodsSpec" class="form-input input-spec" list="flavorSpecOptions" placeholder="选择或输入规格">
+                <datalist id="flavorSpecOptions">
+                    <option value="小锅（2人锅）"></option>
+                    <option value="中锅（4人锅）"></option>
+                    <option value="大锅（6人锅）"></option>
+                    <option value="标准"></option>
+                </datalist>
+                <span class="label-text">做法/口味</span>
+                <input type="text" id="flvName" class="form-input input-flavor" placeholder="必填（如：微辣）">
+                <span class="label-text">口味原料1</span>
+                <input type="text" id="flvMat1Name" class="form-input input-material" placeholder="原料名（如：辣椒）">
+                <input type="text" id="flvMat1Unit" class="form-input input-unit" placeholder="单位（克/斤）">
+                <input type="number" id="flvMat1Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <span class="label-text">口味原料2</span>
+                <input type="text" id="flvMat2Name" class="form-input input-material" placeholder="原料名（如：花椒）">
+                <input type="text" id="flvMat2Unit" class="form-input input-unit" placeholder="单位（克/斤）">
+                <input type="number" id="flvMat2Dose" class="form-input input-dose" placeholder="单份用量" min="0" step="0.01">
+                <button class="btn btn-primary" onclick="saveFlavorConfig()">保存口味配置</button>
+            </div>
+            <div id="flavorList" class="goods-list">
+                <div class="empty-tip">暂未配置任何做法/口味，请先录入商品与口味原食材用量</div>
+            </div>
+        </div>
+    </div>
+    <!-- 二、销售/生产数据粘贴区（默认展开，无折叠按钮和一键粘贴按钮） -->
+    <div class="data-paste">
+        <div class="sec-title">
+            <span>粘贴销售/生产数据</span>
+            <!-- 已移除折叠按钮和一键粘贴按钮，只保留标题 -->
+        </div>
+        <!-- 内容区默认显示，不再折叠 -->
+        <!-- 格式提示与示例文字已按要求隐藏，保留代码便于后续恢复 -->
+        <div class="format-tip" style="display:none;">
+            <strong>粘贴格式：每行1条数据，字段用空格/连续空格分隔</strong>，固定结构：<code>商品名称 商品规格 销售/生产数量</code><br>
+            示例（烘焙/餐饮）：<br>
+            吐司面包 450g/条 12<br>
+            奶油蛋糕 6寸圆形 8<br>
+            全麦面包 300g/条 15
+        </div>
+        <textarea id="dataArea" placeholder="直接粘贴空格/分行分隔的数据，无需修改格式"></textarea>
+    </div>
+    <!-- 二点五、粘贴做法/口味区 -->
+    <div class="data-paste" style="margin-top:25px;">
+        <div class="sec-title">
+            <span>粘贴做法/口味</span>
+        </div>
+        <!-- 格式提示默认隐藏，与上一窗口保持一致 -->
+        <div class="format-tip" style="display:none;">
+            <strong>粘贴格式：每行1条数据，字段用空格/连续空格分隔</strong>，固定结构：<code>菜品名称 商品规格 做法名称 销售数量</code><br>
+            示例：<br>
+            烤鱼 2斤 微辣 5<br>
+            烤鱼 2斤 特辣 3<br>
+            奶茶 中杯 全糖 10
+        </div>
+        <textarea id="flavorDataArea" placeholder="每行：菜品名称 规格 做法名称 数量（空格分隔）"></textarea>
+        <div style="margin-top:15px;">
+            <button class="btn btn-primary" onclick="parseAll()">自动解析并统计</button>
+        </div>
+    </div>
+    <!-- 三、原料消耗明细（表格） -->
+    <div class="result-area" id="resultArea" style="display:none;">
+        <div class="sec-title">原料消耗明细</div>
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>商品名称</th>
+                    <th>商品规格</th>
+                    <th>数量</th>
+                    <th>原料1</th>
+                    <th>原料1用量</th>
+                    <th>原料2</th>
+                    <th>原料2用量</th>
+                    <th>原料3</th>
+                    <th>原料3用量</th>
+                    <th>原料4</th>
+                    <th>原料4用量</th>
+                    <th>原料5</th>
+                    <th>原料5用量</th>
+                    <th>口味原料1</th>
+                    <th>口味原料1用量</th>
+                    <th>口味原料2</th>
+                    <th>口味原料2用量</th>
+                    <th>数据状态</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
+    <!-- 四、口味用量明细（表格） -->
+    <div class="result-area" id="flavorResultArea" style="display:none;">
+        <div class="sec-title">口味用量明细</div>
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>商品名称</th>
+                    <th>商品规格</th>
+                    <th>做法/口味</th>
+                    <th>数量</th>
+                    <th>原料1</th>
+                    <th>原料1用量</th>
+                    <th>原料2</th>
+                    <th>原料2用量</th>
+                    <th>原料3</th>
+                    <th>原料3用量</th>
+                    <th>原料4</th>
+                    <th>原料4用量</th>
+                    <th>原料5</th>
+                    <th>原料5用量</th>
+                    <th>数据状态</th>
+                </tr>
+            </thead>
+            <tbody id="flavorResultBody"></tbody>
+        </table>
+    </div>
+    <!-- 五、汇总区（统一放最下方） -->
+    <div id="summaryArea" style="display:none;">
+        <div class="summary-box">
+            <div class="summary-title">全部原食材总消耗汇总</div>
+            <div id="materialTotalSummary" class="material-summary"></div>
+        </div>
+        <div class="summary-box">
+            <div class="summary-title">口味原料总消耗汇总</div>
+            <div id="flavorMaterialTotalSummary" class="material-summary"></div>
+        </div>
+    </div>
+</div>
+<script>
+// ------------------------------------------------------------
+// 数值格式化：整数去掉.00，小数保留两位
+function formatNum(num) {
+    if (typeof num !== 'number') return num;
+    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+}
+// 折叠/展开栏目（仅用于商品配置区域）
+function toggleFold(contentId, btn) {
+    const content = document.getElementById(contentId);
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        btn.textContent = '折叠';
+    } else {
+        content.style.display = 'none';
+        btn.textContent = '展开';
+    }
+}
+// 本地存储
+let goodsMaterialMap = JSON.parse(localStorage.getItem('goodsMaterialMap')) || {};
+window.onload = function () {
+    renderGoodsList();
+    renderFlavorList();
+};
+// 渲染商品-原料配置列表
+function renderGoodsList() {
+    const listEl = document.getElementById('goodsList');
+    const keys = Object.keys(goodsMaterialMap);
+    if (keys.length === 0) {
+        listEl.innerHTML = '<div class="empty-tip">暂未配置任何成品，请先录入商品与对应原料用量</div>';
+        return;
+    }
+    let html = '';
+    keys.forEach(key => {
+        const parts = key.split('|');
+        const data = goodsMaterialMap[key];
+        // 跳过"做法/口味配方"子区录入的专用口味配方（有口味原料且无基础原料），其在下方列表中单独展示
+        if (data && data.flavorMat1Name && !data.mat1Name) return;
+        const name = parts[0];
+        const spec = parts[1] || '';
+        const matStrs = [];
+        for (let i = 1; i <= 5; i++) {
+            const matName = data[`mat${i}Name`];
+            const matUnit = data[`mat${i}Unit`];
+            const matDose = data[`mat${i}Dose`];
+            if (matName) {
+                matStrs.push(`${matName}${matUnit ? ' ' + matUnit : ''}:${formatNum(matDose)}`);
+            }
+        }
+        const matInfo = matStrs.length > 0 ? matStrs.join(' ｜ ') : '无原食材配置';
+        // 基础配方表单录入的两种口味原材料
+        const fmStrs = [];
+        for (let j = 1; j <= 2; j++) {
+            const fName = data[`flavorMat${j}Name`];
+            const fUnit = data[`flavorMat${j}Unit`];
+            const fDose = data[`flavorMat${j}Dose`];
+            if (fName) {
+                fmStrs.push(`${fName}${fUnit ? ' ' + fUnit : ''}:${formatNum(fDose)}`);
+            }
+        }
+        const fmInfo = fmStrs.length > 0 ? ' ｜ 口味：' + fmStrs.join(' ｜ ') : '';
+        
+        html += `
+        <div class="goods-item">
+            <div class="goods-info">
+                ${name} ${spec}<br>
+                ${matInfo}${fmInfo}
+            </div>
+            <button class="btn-del" onclick="delOneGoods('${encodeURIComponent(key)}')">删除</button>
+        </div>`;
+    });
+    listEl.innerHTML = html;
+}
+// 保存成品配置
+function saveGoodsMaterial() {
+    const name = document.getElementById('goodsName').value.trim();
+    const spec = document.getElementById('goodsSpec').value.trim();
+    const matData = {};
+    for (let i = 1; i <= 5; i++) {
+        matData[`mat${i}Name`] = document.getElementById(`mat${i}Name`).value.trim();
+        matData[`mat${i}Unit`] = document.getElementById(`mat${i}Unit`).value.trim();
+        matData[`mat${i}Dose`] = parseFloat(document.getElementById(`mat${i}Dose`).value) || 0;
+    }
+    // 两种口味原材料（原料5下方录入，用于做法/口味统计）
+    for (let j = 1; j <= 2; j++) {
+        matData[`flavorMat${j}Name`] = document.getElementById(`gFlvMat${j}Name`).value.trim();
+        matData[`flavorMat${j}Unit`] = document.getElementById(`gFlvMat${j}Unit`).value.trim();
+        matData[`flavorMat${j}Dose`] = parseFloat(document.getElementById(`gFlvMat${j}Dose`).value) || 0;
+    }
+    if (!name || !spec) {
+        alert('商品名称与规格均不能为空');
+        return;
+    }
+    const uniqueKey = `${name}|${spec}`;
+    goodsMaterialMap[uniqueKey] = matData;
+    localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+    // 清空输入框
+    document.getElementById('goodsName').value = '';
+    document.getElementById('goodsSpec').value = '';
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById(`mat${i}Name`).value = '';
+        document.getElementById(`mat${i}Unit`).value = '';
+        document.getElementById(`mat${i}Dose`).value = '';
+    }
+    for (let j = 1; j <= 2; j++) {
+        document.getElementById(`gFlvMat${j}Name`).value = '';
+        document.getElementById(`gFlvMat${j}Unit`).value = '';
+        document.getElementById(`gFlvMat${j}Dose`).value = '';
+    }
+    renderGoodsList();
+    alert('成品原料配置已保存至本地');
+}
+// 删除单条成品配置
+function delOneGoods(encodedKey) {
+    const realKey = decodeURIComponent(encodedKey);
+    const parts = realKey.split('|');
+    const showName = parts[0] || '';
+    const showSpec = parts[1] || '';
+    const showFlavor = parts.length > 2 ? parts[2] : '';
+    if (!confirm(`确认删除该成品配置？\n${showName} 规格：${showSpec}${showFlavor ? ' 做法：' + showFlavor : ''}`)) return;
+    delete goodsMaterialMap[realKey];
+    localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+    renderGoodsList();
+}
+// 清空所有成品配置
+function clearAllGoods() {
+    if (!confirm('确定清空所有成品原料配置？操作不可恢复！')) return;
+    goodsMaterialMap = {};
+    localStorage.removeItem('goodsMaterialMap');
+    renderGoodsList();
+    renderFlavorList();
+}
+// ---------- 做法/口味配置（独立窗口，新增） ----------
+// 保存做法/口味配置（含两种口味原食材）
+function saveFlavorConfig() {
+    const name = document.getElementById('flvGoodsName').value.trim();
+    const spec = document.getElementById('flvGoodsSpec').value.trim();
+    const flavor = document.getElementById('flvName').value.trim();
+    const flvData = {};
+    for (let j = 1; j <= 2; j++) {
+        flvData[`flavorMat${j}Name`] = document.getElementById(`flvMat${j}Name`).value.trim();
+        flvData[`flavorMat${j}Unit`] = document.getElementById(`flvMat${j}Unit`).value.trim();
+        flvData[`flavorMat${j}Dose`] = parseFloat(document.getElementById(`flvMat${j}Dose`).value) || 0;
+    }
+    if (!name || !spec || !flavor) {
+        alert('商品名称、规格与做法/口味均不能为空');
+        return;
+    }
+    // 口味原食材允许不填（用于录入无需统计的占位产品）
+    const uniqueKey = `${name}|${spec}|${flavor}`;
+    goodsMaterialMap[uniqueKey] = flvData;
+    localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+    // 清空输入框
+    document.getElementById('flvGoodsName').value = '';
+    document.getElementById('flvGoodsSpec').value = '';
+    document.getElementById('flvName').value = '';
+    for (let j = 1; j <= 2; j++) {
+        document.getElementById(`flvMat${j}Name`).value = '';
+        document.getElementById(`flvMat${j}Unit`).value = '';
+        document.getElementById(`flvMat${j}Dose`).value = '';
+    }
+    renderFlavorList();
+    alert('口味原料配置已保存至本地');
+}
+// 渲染做法/口味配置列表（仅展示"做法/口味配方"子区录入的专用口味配方）
+function renderFlavorList() {
+    const listEl = document.getElementById('flavorList');
+    const keys = Object.keys(goodsMaterialMap).filter(k => {
+        const d = goodsMaterialMap[k];
+        // 仅专用口味配方（有口味原料且无基础原料）
+        return d && d.flavorMat1Name && !d.mat1Name;
+    });
+    if (keys.length === 0) {
+        listEl.innerHTML = '<div class="empty-tip">暂未配置任何做法/口味，请先录入商品与口味原食材用量</div>';
+        return;
+    }
+    let html = '';
+    keys.forEach(key => {
+        const parts = key.split('|');
+        const name = parts[0];
+        const spec = parts[1] || '';
+        const flavor = parts[2] || '';
+        const data = goodsMaterialMap[key];
+        const fmStrs = [];
+        for (let j = 1; j <= 2; j++) {
+            const matName = data[`flavorMat${j}Name`];
+            const matUnit = data[`flavorMat${j}Unit`];
+            const matDose = data[`flavorMat${j}Dose`];
+            if (matName) {
+                fmStrs.push(`${matName}${matUnit ? ' ' + matUnit : ''}:${formatNum(matDose)}`);
+            }
+        }
+        const fmInfo = fmStrs.length > 0 ? fmStrs.join(' ｜ ') : '无口味原食材配置';
+        html += `
+        <div class="goods-item">
+            <div class="goods-info">
+                ${name} ${spec} · ${flavor}<br>
+                ${fmInfo}
+            </div>
+            <button class="btn-del" onclick="delOneFlavor('${encodeURIComponent(key)}')">删除</button>
+        </div>`;
+    });
+    listEl.innerHTML = html;
+}
+// 删除单条做法/口味配置
+function delOneFlavor(encodedKey) {
+    const realKey = decodeURIComponent(encodedKey);
+    const parts = realKey.split('|');
+    const showName = parts[0] || '';
+    const showSpec = parts[1] || '';
+    const showFlavor = parts.length > 2 ? parts[2] : '';
+    if (!confirm(`确认删除该口味配置？\n${showName} 规格：${showSpec} 做法：${showFlavor}`)) return;
+    delete goodsMaterialMap[realKey];
+    localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+    renderFlavorList();
+}
+// 清空全部做法/口味配置（仅清专用口味配方，不影响基础配方及基础配方录入的口味原料）
+function clearAllFlavors() {
+    if (!confirm('确定清空所有做法/口味配置？操作不可恢复！')) return;
+    const keys = Object.keys(goodsMaterialMap);
+    keys.forEach(k => {
+        if (goodsMaterialMap[k] && goodsMaterialMap[k].flavorMat1Name && !goodsMaterialMap[k].mat1Name) {
+            delete goodsMaterialMap[k];
+        }
+    });
+    localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+    renderFlavorList();
+}
+// 导出成品配置为JSON文件
+function exportGoodsConfig() {
+    if (Object.keys(goodsMaterialMap).length === 0) {
+        alert('暂无配置数据可导出');
+        return;
+    }
+    const jsonStr = JSON.stringify(goodsMaterialMap, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toLocaleString('zh-CN').replace(/[\/: ]/g, '-');
+    a.download = `成品配置_${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+// 导入成品配置JSON文件
+function importGoodsConfig(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+        alert('请选择JSON格式的配置文件');
+        fileInput.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (typeof importedData !== 'object' || importedData === null) {
+                throw new Error('配置文件格式错误');
+            }
+            // 简单校验
+            const sampleKey = Object.keys(importedData)[0];
+            if (sampleKey && !importedData[sampleKey].hasOwnProperty('mat1Name')) {
+                throw new Error('配置文件字段不完整');
+            }
+            goodsMaterialMap = importedData;
+            localStorage.setItem('goodsMaterialMap', JSON.stringify(goodsMaterialMap));
+            renderGoodsList();
+            fileInput.value = '';
+            alert('配置导入成功！');
+        } catch (err) {
+            alert(`导入失败：${err.message}`);
+            fileInput.value = '';
+        }
+    };
+    reader.readAsText(file);
+}
+// ---------- 汇总区显示控制：任一汇总有内容则显示整个汇总区 ----------
+function updateSummaryArea() {
+    const hasMat = document.getElementById('materialTotalSummary').textContent.trim() !== '';
+    const hasFlv = document.getElementById('flavorMaterialTotalSummary').textContent.trim() !== '';
+    document.getElementById('summaryArea').style.display = (hasMat || hasFlv) ? 'block' : 'none';
+}
+// ---------- 统一渲染两个汇总框（原食材汇总 + 口味原料汇总） ----------
+function renderSummary(materialTotal, flavorTotal) {
+    document.getElementById('materialTotalSummary').innerHTML = buildSummaryHtml(materialTotal) || '<div class="summary-item" style="color:#6b7280;">暂无原料消耗</div>';
+    document.getElementById('flavorMaterialTotalSummary').innerHTML = buildSummaryHtml(flavorTotal) || '<div class="summary-item" style="color:#6b7280;">暂无原料消耗</div>';
+    updateSummaryArea();
+}
+// 构建汇总HTML（按原料名称字数从小到大排序）
+function buildSummaryHtml(matTotal) {
+    let sumHtml = '';
+    const sortedMatKeys = Object.keys(matTotal).sort((a, b) => {
+        const matNameA = a.split('|')[0];
+        const matNameB = b.split('|')[0];
+        return matNameA.length - matNameB.length;
+    });
+    sortedMatKeys.forEach(sumKey => {
+        const [matName, matUnit] = sumKey.split('|');
+        const totalVal = matTotal[sumKey];
+        if (matUnit) {
+            sumHtml += `<div class="summary-item">${matName}：${formatNum(totalVal)} ${matUnit}</div>`;
+        } else {
+            sumHtml += `<div class="summary-item">${matName}：${formatNum(totalVal)}</div>`;
+        }
+    });
+    return sumHtml;
+}
+// ---------- 统一解析入口：点击"自动解析并统计"按钮时实时更新结果 ----------
+// 哪个输入框有数据就统计哪个；基础配方口味原料与专用口味配方统一汇总到"口味原料总消耗汇总"
+function parseAll() {
+    const rawText = document.getElementById('dataArea').value.trim();
+    const flavorText = document.getElementById('flavorDataArea').value.trim();
+    if (!rawText && !flavorText) {
+        document.getElementById('resultArea').style.display = 'none';
+        document.getElementById('flavorResultArea').style.display = 'none';
+        document.getElementById('materialTotalSummary').innerHTML = '';
+        document.getElementById('flavorMaterialTotalSummary').innerHTML = '';
+        updateSummaryArea();
+        return;
+    }
+    if (Object.keys(goodsMaterialMap).length === 0) {
+        alert('请先配置成品商品与对应原食材用量');
+        return;
+    }
+    let materialTotal = {};
+    let flavorTotal = {};
+    if (rawText) {
+        const res = parseAndCalcMaterial();
+        materialTotal = res.materialTotal;
+        flavorTotal = res.flavorMatTotal;
+    } else {
+        document.getElementById('resultArea').style.display = 'none';
+    }
+    if (flavorText) {
+        const fTotal = parseAndCalcFlavor();
+        // 合并专用口味配方与基础配方的口味原料
+        Object.keys(fTotal).forEach(k => {
+            flavorTotal[k] = (flavorTotal[k] || 0) + fTotal[k];
+        });
+    } else {
+        document.getElementById('flavorResultArea').style.display = 'none';
+    }
+    renderSummary(materialTotal, flavorTotal);
+}
+// ---------- 解析销售数据并计算原料 ----------
+function parseAndCalcMaterial() {
+    const rawText = document.getElementById('dataArea').value.trim();
+    const libKeys = Object.keys(goodsMaterialMap);
+    if (libKeys.length === 0) {
+        alert('请先配置成品商品与对应原食材用量');
+        return;
+    }
+    if (!rawText) {
+        alert('请粘贴销售/生产数量数据');
+        return;
+    }
+    const lines = rawText.split(/\n/).filter(line => line.trim() !== '');
+    const resultList = [];
+    const materialTotal = {};
+    const flavorMatTotal = {};
+    lines.forEach(line => {
+        const fields = line.trim().split(/\s+/).filter(item => item !== '');
+        if (fields.length < 3) {
+            resultList.push({
+                name: fields[0] || '', spec: fields[1] || '', qty: 0,
+                mat1: '', mat1Val: '-', mat1Unit: '',
+                mat2: '', mat2Val: '-', mat2Unit: '',
+                mat3: '', mat3Val: '-', mat3Unit: '',
+                mat4: '', mat4Val: '-', mat4Unit: '',
+                mat5: '', mat5Val: '-', mat5Unit: '',
+                fm1: '-', fm1Val: '-', fm1Unit: '',
+                fm2: '-', fm2Val: '-', fm2Unit: '',
+                status: '格式错误'
+            });
+            return;
+        }
+        const qty = parseFloat(fields[fields.length - 1]) || 0;
+        const spec = fields[fields.length - 2];
+        const name = fields.slice(0, fields.length - 2).join(' ');
+        const matchKey = `${name}|${spec}`;
+        if (goodsMaterialMap.hasOwnProperty(matchKey)) {
+            const matCfg = goodsMaterialMap[matchKey];
+            // 无任何原料（含口味原料）→ 标记为"无原料"，用于过滤无用产品
+            const hasMat = [1,2,3,4,5].some(i => matCfg[`mat${i}Name`]) || [1,2].some(j => matCfg[`flavorMat${j}Name`]);
+            const resultItem = {
+                name, spec, qty,
+                status: hasMat ? '匹配成功' : '无原料'
+            };
+            for (let i = 1; i <= 5; i++) {
+                const matName = matCfg[`mat${i}Name`];
+                const matUnit = matCfg[`mat${i}Unit`];
+                const matDose = matCfg[`mat${i}Dose`];
+                if (matName) {
+                    const totalVal = qty * matDose;
+                    resultItem[`mat${i}`] = matName;
+                    resultItem[`mat${i}Val`] = totalVal;
+                    resultItem[`mat${i}Unit`] = matUnit;
+                    const sumKey = `${matName}|${matUnit || ''}`;
+                    materialTotal[sumKey] = (materialTotal[sumKey] || 0) + totalVal;
+                } else {
+                    resultItem[`mat${i}`] = '-';
+                    resultItem[`mat${i}Val`] = '-';
+                    resultItem[`mat${i}Unit`] = '';
+                }
+            }
+            // 基础配方录入的两种口味原材料（计入"口味原料总消耗汇总"，不入原食材汇总）
+            for (let j = 1; j <= 2; j++) {
+                const matName = matCfg[`flavorMat${j}Name`];
+                const matUnit = matCfg[`flavorMat${j}Unit`];
+                const matDose = matCfg[`flavorMat${j}Dose`];
+                if (matName) {
+                    const totalVal = qty * matDose;
+                    resultItem[`fm${j}`] = matName;
+                    resultItem[`fm${j}Val`] = totalVal;
+                    resultItem[`fm${j}Unit`] = matUnit;
+                    const sumKey = `${matName}|${matUnit || ''}`;
+                    flavorMatTotal[sumKey] = (flavorMatTotal[sumKey] || 0) + totalVal;
+                } else {
+                    resultItem[`fm${j}`] = '-';
+                    resultItem[`fm${j}Val`] = '-';
+                    resultItem[`fm${j}Unit`] = '';
+                }
+            }
+            resultList.push(resultItem);
+        } else {
+            resultList.push({
+                name, spec, qty,
+                mat1: '-', mat1Val: '-', mat1Unit: '',
+                mat2: '-', mat2Val: '-', mat2Unit: '',
+                mat3: '-', mat3Val: '-', mat3Unit: '',
+                mat4: '-', mat4Val: '-', mat4Unit: '',
+                mat5: '-', mat5Val: '-', mat5Unit: '',
+                fm1: '-', fm1Val: '-', fm1Unit: '',
+                fm2: '-', fm2Val: '-', fm2Unit: '',
+                status: '未匹配'
+            });
+        }
+    });
+    renderResult(resultList);
+    return { materialTotal: materialTotal, flavorMatTotal: flavorMatTotal };
+}
+// 渲染明细表格（不含汇总，汇总由 renderSummary 统一渲染）
+function renderResult(data) {
+    const tbody = document.getElementById('resultBody');
+    const resultArea = document.getElementById('resultArea');
+    let html = '';
+    data.forEach(item => {
+        const statusCls = item.status === '匹配成功' ? '' : (item.status === '无原料' ? 'status-nomaterial' : 'status-error');
+        const matShows = [];
+        for (let i = 1; i <= 5; i++) {
+            const val = item[`mat${i}Val`];
+            const unit = item[`mat${i}Unit`];
+            if (val === '-') {
+                matShows.push('-');
+            } else {
+                matShows.push(`${formatNum(val)} ${unit}`.trim());
+            }
+        }
+        const fmShows = [];
+        for (let j = 1; j <= 2; j++) {
+            const val = item[`fm${j}Val`];
+            const unit = item[`fm${j}Unit`];
+            if (val === '-') {
+                fmShows.push('-');
+            } else {
+                fmShows.push(`${formatNum(val)} ${unit}`.trim());
+            }
+        }
+        html += `
+        <tr>
+            <td>${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.qty}</td>
+            <td>${item.mat1}</td>
+            <td>${matShows[0]}</td>
+            <td>${item.mat2}</td>
+            <td>${matShows[1]}</td>
+            <td>${item.mat3}</td>
+            <td>${matShows[2]}</td>
+            <td>${item.mat4}</td>
+            <td>${matShows[3]}</td>
+            <td>${item.mat5}</td>
+            <td>${matShows[4]}</td>
+            <td>${item.fm1}</td>
+            <td>${fmShows[0]}</td>
+            <td>${item.fm2}</td>
+            <td>${fmShows[1]}</td>
+            <td class="${statusCls}">${item.status}</td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+    resultArea.style.display = 'block';
+}
+// ---------- 解析做法/口味数据并统计原料（兼容两种口味配方结构） ----------
+function parseAndCalcFlavor() {
+    const rawText = document.getElementById('flavorDataArea').value.trim();
+    const libKeys = Object.keys(goodsMaterialMap);
+    if (libKeys.length === 0) {
+        alert('请先在成品库配置中配置商品配方');
+        return;
+    }
+    if (!rawText) {
+        alert('请粘贴带做法/口味的销售/生产数量数据');
+        return;
+    }
+    const lines = rawText.split(/\n/).filter(line => line.trim() !== '');
+    const resultList = [];
+    const materialTotal = {};
+    lines.forEach(line => {
+        const fields = line.trim().split(/\s+/).filter(item => item !== '');
+        if (fields.length < 4) {
+            resultList.push({
+                name: fields[0] || '', spec: fields[1] || '', flavor: fields[2] || '', qty: 0,
+                mat1: '-', mat1Val: '-', mat1Unit: '',
+                mat2: '-', mat2Val: '-', mat2Unit: '',
+                mat3: '-', mat3Val: '-', mat3Unit: '',
+                mat4: '-', mat4Val: '-', mat4Unit: '',
+                mat5: '-', mat5Val: '-', mat5Unit: '',
+                status: '格式错误'
+            });
+            return;
+        }
+        const qty = parseFloat(fields[fields.length - 1]) || 0;
+        const flavor = fields[fields.length - 2];
+        const spec = fields[fields.length - 3];
+        const name = fields.slice(0, fields.length - 3).join(' ');
+        const matchKey = `${name}|${spec}|${flavor}`;
+        if (goodsMaterialMap.hasOwnProperty(matchKey)) {
+            const matCfg = goodsMaterialMap[matchKey];
+            // 无任何原料 → 标记为"无原料"，用于过滤无用产品
+            const hasMat = [1,2].some(j => matCfg[`flavorMat${j}Name`]) || [1,2,3,4,5].some(i => matCfg[`mat${i}Name`]);
+            const resultItem = {
+                name, spec, flavor, qty,
+                status: hasMat ? '匹配成功' : '无原料'
+            };
+            // 专用口味配方（flavorMat 结构）用2种口味原料；基础表单录入的口味配方（mat 结构）用5种原料
+            const useFlavorMat = matCfg.flavorMat1Name || matCfg.flavorMat2Name;
+            for (let i = 1; i <= 5; i++) {
+                let matName = '', matUnit = '', matDose = 0;
+                if (useFlavorMat) {
+                    if (i <= 2) {
+                        matName = matCfg[`flavorMat${i}Name`] || '';
+                        matUnit = matCfg[`flavorMat${i}Unit`] || '';
+                        matDose = matCfg[`flavorMat${i}Dose`] || 0;
+                    }
+                } else {
+                    matName = matCfg[`mat${i}Name`] || '';
+                    matUnit = matCfg[`mat${i}Unit`] || '';
+                    matDose = matCfg[`mat${i}Dose`] || 0;
+                }
+                if (matName) {
+                    const totalVal = qty * matDose;
+                    resultItem[`mat${i}`] = matName;
+                    resultItem[`mat${i}Val`] = totalVal;
+                    resultItem[`mat${i}Unit`] = matUnit;
+                    const sumKey = `${matName}|${matUnit || ''}`;
+                    materialTotal[sumKey] = (materialTotal[sumKey] || 0) + totalVal;
+                } else {
+                    resultItem[`mat${i}`] = '-';
+                    resultItem[`mat${i}Val`] = '-';
+                    resultItem[`mat${i}Unit`] = '';
+                }
+            }
+            resultList.push(resultItem);
+        } else {
+            resultList.push({
+                name, spec, flavor, qty,
+                mat1: '-', mat1Val: '-', mat1Unit: '',
+                mat2: '-', mat2Val: '-', mat2Unit: '',
+                mat3: '-', mat3Val: '-', mat3Unit: '',
+                mat4: '-', mat4Val: '-', mat4Unit: '',
+                mat5: '-', mat5Val: '-', mat5Unit: '',
+                status: '未匹配'
+            });
+        }
+    });
+    renderFlavorResult(resultList);
+    return materialTotal;
+}
+// 渲染口味明细表格（不含汇总，汇总由 renderSummary 统一渲染）
+function renderFlavorResult(data) {
+    const tbody = document.getElementById('flavorResultBody');
+    const resultArea = document.getElementById('flavorResultArea');
+    let html = '';
+    data.forEach(item => {
+        const statusCls = item.status === '匹配成功' ? '' : (item.status === '无原料' ? 'status-nomaterial' : 'status-error');
+        const matShows = [];
+        for (let i = 1; i <= 5; i++) {
+            const val = item[`mat${i}Val`];
+            const unit = item[`mat${i}Unit`];
+            if (val === '-') {
+                matShows.push('-');
+            } else {
+                matShows.push(`${formatNum(val)} ${unit}`.trim());
+            }
+        }
+        html += `
+        <tr>
+            <td>${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.flavor || '-'}</td>
+            <td>${item.qty}</td>
+            <td>${item.mat1}</td>
+            <td>${matShows[0]}</td>
+            <td>${item.mat2}</td>
+            <td>${matShows[1]}</td>
+            <td>${item.mat3}</td>
+            <td>${matShows[2]}</td>
+            <td>${item.mat4}</td>
+            <td>${matShows[3]}</td>
+            <td>${item.mat5}</td>
+            <td>${matShows[4]}</td>
+            <td class="${statusCls}">${item.status}</td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+    resultArea.style.display = 'block';
+}
+// 一键粘贴函数已移除，不再需要
+// （原 pasteAndParse 函数已删除）
+// ------------------------------------------------------------
+</script>
+</body>
+</html>
